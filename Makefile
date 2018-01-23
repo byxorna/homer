@@ -1,5 +1,6 @@
 PACKAGE  = github.com/byxorna/homer
-BINARY   = homer-client
+BINARY_CLIENT   = homer-client
+BINARY_SERVER   = homer-server
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 	    cat $(CURDIR)/.version 2> /dev/null || echo v0)
@@ -19,17 +20,25 @@ Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m✈\033[0m")
 
 .PHONY: all
-all: fmt lint vendor | $(BASE) ; $(info $(M) building executable…) @ ## Build program binary
+all: client server
+.PHONY: client
+client: fmt lint vendor | $(BASE) ; $(info $(M) building client executable…) @ ## Build program binary
 	$Q cd $(BASE) && $(GO) build \
 	  -tags release \
 	  -ldflags '-X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -X $(PACKAGE)/version.Package=$(PACKAGE)' \
-	  -o bin/$(BINARY) *.go \
-	  && echo "Built bin/$(BINARY): $(VERSION) $(DATE)"
+	  -o bin/$(BINARY_CLIENT) client.go \
+	  && echo "Built bin/$(BINARY_CLIENT): $(VERSION) $(DATE)"
+#server: fmt lint vendor | $(BASE) ; $(info $(M) building server executable…) @ ## Build program binary
+#	$Q cd $(BASE) && $(GO) build \
+#	  -tags release \
+#	  -ldflags '-X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -X $(PACKAGE)/version.Package=$(PACKAGE)' \
+#	  -o bin/$(BINARY_SERVER) server/*.go \
+#	  && echo "Built bin/$(BINARY_SERVER): $(VERSION) $(DATE)"
 .PHONY: release
 release: export GOOS=linux
 release: export GOARCH=amd64
 release: all
-	$(info $(M) tagging $(BINARY) as $(VERSION)…) @ ## rename build to include version
+	$(info $(M) tagging $(BINARY_CLIENT) as $(VERSION)…) @ ## rename build to include version
 	$Q cd $(BASE) && cp bin/$(BINARY) bin/$(BINARY)-$(VERSION)
 	$Q echo Tagged $(GOOS)/$(GOARCH) bin/$(BINARY)-$(VERSION)
 
