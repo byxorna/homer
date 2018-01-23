@@ -39,8 +39,11 @@ release: export GOOS=linux
 release: export GOARCH=amd64
 release: all
 	$(info $(M) tagging $(BINARY_CLIENT) as $(VERSION)…) @ ## rename build to include version
-	$Q cd $(BASE) && cp bin/$(BINARY) bin/$(BINARY)-$(VERSION)
-	$Q echo Tagged $(GOOS)/$(GOARCH) bin/$(BINARY)-$(VERSION)
+	$Q cd $(BASE) && cp bin/$(BINARY_CLIENT) bin/$(BINARY_CLIENT)-$(VERSION)
+	$Q echo Tagged $(GOOS)/$(GOARCH) bin/$(BINARY_CLIENT)-$(VERSION)
+	$(info $(M) tagging $(BINARY_SERVER) as $(VERSION)…) @ ## rename build to include version
+	$Q cd $(BASE) && cp bin/$(BINARY_SERVER) bin/$(BINARY_SERVER)-$(VERSION)
+	$Q echo Tagged $(GOOS)/$(GOARCH) bin/$(BINARY_SERVER)-$(VERSION)
 
 .PHONY: deploy-release
 deploy-release: release
