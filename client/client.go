@@ -9,9 +9,10 @@ import (
 	"net"
 	"net/http"
 	"time"
-	//"github.com/patrickmn/go-cache"
 
 	"github.com/byxorna/homer/types"
+	"github.com/miekg/dns"
+	"github.com/patrickmn/go-cache"
 )
 
 type client struct {
@@ -19,6 +20,7 @@ type client struct {
 	listenIP   net.IP
 	listenPort int
 	httpClient *http.Client
+	cache      *cache.Cache
 }
 
 // Client ...
@@ -39,6 +41,7 @@ func NewClient(cfg Config) (Client, error) {
 		listenIP:   laddr,
 		listenPort: lport,
 		httpClient: &httpClient,
+		cache:      cache.New(24*time.Hour, 60*time.Second),
 	}
 	return &c, nil
 }
@@ -77,10 +80,51 @@ func (c *client) ListenAndServe() error {
 // handle handles a UDP datagram request
 func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 
-	//lets just blast the wire request into the HTTP request
+	// validate this is an ok request first
+	reqMsg := dns.Msg{}
+	err := reqMsg.Unpack(buf)
+	if err != nil {
+		log.Printf("not valid DNS request: %v\n", err)
+		return err
+	}
+	if len(reqMsg.Question) < 1 {
+		return fmt.Errorf("no questions in request")
+	}
+
+	qname := reqMsg.Question[0].Name
+	qtype := dns.TypeToString[reqMsg.Question[0].Qtype]
+	log.Printf("resolving %s/%s", qname, qtype)
+
+	// handle returning results from cache if present
+	// lifted from https://github.com/pforemski/dingo/blob/master/dingo.go#L100
+	qid := fmt.Sprintf("%s|%s", qtype, qname)
+	if x, found := c.cache.Get(qid); found {
+		// FIXME: update TTLs
+		log.Printf("cached entry for %s found\n", qid)
+		cachedData := x.([]byte)
+		//unpack message and update the header ID to match the request
+		var cachedMsg dns.Msg
+		err := cachedMsg.Unpack(cachedData)
+		if err == nil {
+			cachedMsg.Id = reqMsg.Id
+			// now, repack the message and transmit to the udpaddr
+			repacked, err := cachedMsg.Pack()
+			if err == nil {
+				_, err := conn.WriteToUDP(repacked, ua)
+				if err != nil {
+					log.Printf("error writing cached response for %s to %s: %v\n", qid, ua, err)
+				}
+				return err
+			}
+			log.Printf("error repacking cached message %s with id %d; invalidating cache and continuing: %v\n", qid, reqMsg.Id, err)
+			c.cache.Delete(qid)
+		} else {
+			log.Printf("error unpacking cached message %s; invalidating cache and continuing: %v\n", qid, err)
+			c.cache.Delete(qid)
+		}
+	}
 
 	// body=base64url(wireformat) IFF method=GET
-	// each 6 bits -> 1 byte
 	base64dnsreq := make([]byte, base64.URLEncoding.EncodedLen(len(buf)))
 	base64.URLEncoding.Encode(base64dnsreq, buf)
 
@@ -104,21 +148,6 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 	req.Header.Set("accept", types.TypeDNSUDPWireFormat)
 	req.Header.Set("content-type", types.TypeDNSUDPWireFormat)
 
-	/*
-	   :method = POST
-	   :scheme = https
-	   :authority = dnsserver.example.net
-	   :path = /.well-known/dns-query
-	   accept = application/dns-udpwireformat, application/simpledns+json
-	   content-type = application/dns-udpwireformat
-	   content-length = 33
-
-	   <33 bytes represented by the following hex encoding>
-	   abcd 0100 0001 0000 0000 0000 0377 7777
-	   0765 7861 6d70 6c65 0363 6f6d 0000 0100
-	   01
-	*/
-
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
@@ -139,8 +168,11 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("read %d bytes from body\n", len(body))
-	//log.Printf("body: %v\n", body)
+	//log.Printf("read %d bytes from body\n", len(body))
+
+	/* put resp in cache for 10 seconds (FIXME: use minimum TTL) */
+	// TODO: make the cached value = msg.Answer[0].Ttl
+	c.cache.Set(qid, body, 10*time.Second)
 
 	nBytes, err := conn.WriteToUDP(body, ua)
 	if err != nil {

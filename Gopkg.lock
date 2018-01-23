@@ -8,6 +8,12 @@
   version = "v1.0.3"
 
 [[projects]]
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -37,6 +43,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cba165873d26bef8f3816f661422392e4f071b709863f11d0876b8ea8cd61e23"
+  inputs-digest = "d3c0bef159b43511780f7977aac967bab50dddb9c8536e907d7cc0f21b321841"
   solver-name = "gps-cdcl"
   solver-version = 1
