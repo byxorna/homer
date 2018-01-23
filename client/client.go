@@ -9,6 +9,8 @@ import (
 	"net"
 	"net/http"
 	//"github.com/patrickmn/go-cache"
+
+	"github.com/byxorna/homer/types"
 )
 
 type client struct {
@@ -17,11 +19,6 @@ type client struct {
 	listenPort int
 	httpClient *http.Client
 }
-
-const (
-	// TypeDNSUDPWireFormat ...
-	TypeDNSUDPWireFormat = "application/dns-udpwireformat"
-)
 
 // Client ...
 type Client interface {
@@ -94,13 +91,13 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 
 	// set params for the request
 	params := req.URL.Query()
-	params.Add("ct", TypeDNSUDPWireFormat)
+	params.Add("ct", types.TypeDNSUDPWireFormat)
 	params.Add("body", bytes.NewBuffer(base64dnsreq).String())
 	req.URL.RawQuery = params.Encode()
 
 	// set headers, etc
-	req.Header.Set("accept", TypeDNSUDPWireFormat)
-	req.Header.Set("content-type", TypeDNSUDPWireFormat)
+	req.Header.Set("accept", types.TypeDNSUDPWireFormat)
+	req.Header.Set("content-type", types.TypeDNSUDPWireFormat)
 
 	/*
 	   :method = POST
@@ -124,9 +121,14 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 
 	// process resp
 	length := resp.Header.Get("content-length")
-	log.Print("got response with content-length: %s\n", length)
-	if resp.Header.Get("content-type") != TypeDNSUDPWireFormat {
+	log.Printf("got %s response with content-length: %s\n", resp.Status, length)
+	if resp.Header.Get("content-type") != types.TypeDNSUDPWireFormat {
 		return fmt.Errorf("response had wrong content type! unable to process %v", resp.Header.Get("content-type"))
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("bummer, got %s\n", resp.Status)
+		// TODO: should return a simulated message to resolver to indicate SERVFAIL
+		return fmt.Errorf("fuck something was wrong with the request")
 	}
 	bufResp := []byte{}
 	nBytes, err := resp.Body.Read(bufResp)

@@ -28,12 +28,12 @@ client: fmt lint vendor | $(BASE) ; $(info $(M) building client executable…) @
 	  -ldflags '-X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -X $(PACKAGE)/version.Package=$(PACKAGE)' \
 	  -o bin/$(BINARY_CLIENT) client.go \
 	  && echo "Built bin/$(BINARY_CLIENT): $(VERSION) $(DATE)"
-#server: fmt lint vendor | $(BASE) ; $(info $(M) building server executable…) @ ## Build program binary
-#	$Q cd $(BASE) && $(GO) build \
-#	  -tags release \
-#	  -ldflags '-X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -X $(PACKAGE)/version.Package=$(PACKAGE)' \
-#	  -o bin/$(BINARY_SERVER) server/*.go \
-#	  && echo "Built bin/$(BINARY_SERVER): $(VERSION) $(DATE)"
+server: fmt lint vendor | $(BASE) ; $(info $(M) building server executable…) @ ## Build program binary
+	$Q cd $(BASE) && $(GO) build \
+	  -tags release \
+	  -ldflags '-X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -X $(PACKAGE)/version.Package=$(PACKAGE)' \
+	  -o bin/$(BINARY_SERVER) server.go \
+	  && echo "Built bin/$(BINARY_SERVER): $(VERSION) $(DATE)"
 .PHONY: release
 release: export GOOS=linux
 release: export GOARCH=amd64
