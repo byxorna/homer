@@ -20,8 +20,13 @@ $ make
 ## Client
 
 ```
-$ bin/homer-client -config config/client.yaml
-2018/01/23 17:06:04 Listening for DNS on 127.0.0.1:13000
+$ sudo bin/homer-client -config config/client.yaml
+2018/01/23 17:06:04 Listening for DNS on 127.0.0.1:53
+```
+
+Make sure you add your resolver into /etc/resolv.conf
+```
+echo "nameserver 127.0.0.1" |sudo tee /etc/resolv.conf
 ```
 
 ## Server
@@ -34,7 +39,7 @@ $ bin/homer-server -config config/server.yaml
 ## Make DNS Requests
 
 ```
-$ dig @localhost -p 13000 google.com
+$ dig @127.0.0.1 -p 53 google.com
 ```
 
 # Links

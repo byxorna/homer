@@ -140,7 +140,7 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 		return err
 	}
 	log.Printf("read %d bytes from body\n", len(body))
-	log.Printf("body: %v\n", body)
+	//log.Printf("body: %v\n", body)
 
 	nBytes, err := conn.WriteToUDP(body, ua)
 	if err != nil {
