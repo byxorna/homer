@@ -1,0 +1,4 @@
+---
+listenaddr: 127.0.0.1
+listenport: 13000
+dohurl: http://127.0.0.1:9000

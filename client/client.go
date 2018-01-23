@@ -78,7 +78,8 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 	//lets just blast the wire request into the HTTP request
 
 	// body=base64url(wireformat) IFF method=GET
-	base64dnsreq := []byte{} // i dunno how large to make this? can we presize this? i suspect so but for now, hackday.
+	// each 6 bits -> 1 byte
+	base64dnsreq := make([]byte, base64.URLEncoding.EncodedLen(len(buf)))
 	base64.URLEncoding.Encode(base64dnsreq, buf)
 
 	// path: /.well-known/dns-query
