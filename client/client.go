@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	//"github.com/miekg/dns"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"time"
 	//"github.com/patrickmn/go-cache"
 
 	"github.com/byxorna/homer/types"
@@ -60,10 +61,14 @@ func (c *client) ListenAndServe() error {
 		nread, rAddr, err := udpconn.ReadFromUDP(buf)
 		if err == nil {
 			// TODO: thread this
+			tStart := time.Now()
 			err = c.handle(buf[0:nread], rAddr, udpconn)
+			tEnd := time.Now()
+			elapsed := tEnd.Sub(tStart)
 			if err != nil {
 				log.Printf("error handling request: %v\n", err)
 			}
+			log.Printf("Handled request in %s\n", elapsed.String())
 		}
 	}
 
@@ -130,15 +135,14 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 		// TODO: should return a simulated message to resolver to indicate SERVFAIL
 		return fmt.Errorf("fuck something was wrong with the request")
 	}
-	bufResp := []byte{}
-	nBytes, err := resp.Body.Read(bufResp)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-	log.Printf("read %d bytes from body\n", nBytes)
-	log.Printf("body: %v\n", bufResp)
+	log.Printf("read %d bytes from body\n", len(body))
+	log.Printf("body: %v\n", body)
 
-	nBytes, err = conn.WriteToUDP(bufResp, ua)
+	nBytes, err := conn.WriteToUDP(body, ua)
 	if err != nil {
 		return err
 	}
