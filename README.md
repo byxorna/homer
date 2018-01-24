@@ -31,6 +31,8 @@ echo "nameserver 127.0.0.1" |sudo tee /etc/resolv.conf
 
 ## Server
 
+Builds happen automatically for the docker image: https://hub.docker.com/r/byxorna/homer-server
+
 ```
 $ bin/homer-server -config config/server.yaml
 2018/01/23 17:07:58 Listening on 0.0.0.0:9000
@@ -49,3 +51,4 @@ $ dig @127.0.0.1 -p 53 google.com
 * https://developers.google.com/speed/public-dns/docs/dns-over-https
 * https://datatracker.ietf.org/wg/doh/about/
 * https://github.com/m13253/dns-over-https
+
