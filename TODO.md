@@ -1,0 +1,2 @@
+- [ ] make persistent TLS connection to endpoint?
+- [ ] make h2
