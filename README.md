@@ -1,5 +1,8 @@
 # homer
+
 DNS over HTTPS implementation (IETF, _not_ google implementation)
+
+Run a local resolver (`homer-client`) on your laptop, which receives DNS requests on `127.0.0.1:53`, and forwards them over HTTPS to `homer-server` for resolution.
 
 # Client
 
