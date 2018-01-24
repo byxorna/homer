@@ -17,3 +17,4 @@ vendor/
 .gopath~/
 *.swp
 bin/
+.DS_Store

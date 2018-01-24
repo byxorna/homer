@@ -44,6 +44,28 @@ $ bin/homer-server -config config/server.yaml
 $ dig @127.0.0.1 -p 53 google.com
 ```
 
+# Pretty Pictures
+
+## Laptop
+
+![client configuration](./images/client-config.png)
+
+![run homer client](./images/run-homer-client.png)
+
+![laptop resolv.conf](./images/run-homer-client.png)
+
+## Server
+
+![server config](./images/server-config.png)
+
+![nginx config](./images/nginx-config.png)
+
+![server docker images](./images/server-docker-containers.png)
+
+## It works!
+
+![end to end test](./images/end-to-end.png)
+
 # Links
 
 * https://github.com/pforemski/dingo
