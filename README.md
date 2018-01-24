@@ -12,6 +12,8 @@ Client listens on `53/udp` for DNS messages. It encodes them into HTTP requests 
 
 Server listens on HTTP[S] for DNS over HTTP requests, decodes them, performs resolution, and returns the response.
 
+This implements [https://tools.ietf.org/html/draft-ietf-doh-dns-over-https-02](https://tools.ietf.org/html/draft-ietf-doh-dns-over-https-02) and handles `/.well-known/dns-request` `GET` requests
+
 # Building
 
 ```
