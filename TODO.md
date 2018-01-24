@@ -1,2 +1,4 @@
+- [ ] use buffer pool for handling miekg dns message structs
 - [ ] make persistent TLS connection to endpoint?
-- [ ] make h2
+- [ ] add option to connect to server by IP and validate cert by pub key, not CA? (i.e. 0-dns)
+- [ ] make h2 work
