@@ -1,4 +1,5 @@
 ---
 listenaddr: 127.0.0.1
 listenport: 53
-dohurl: http://127.0.0.1:9000
+doh:
+  url: http://127.0.0.1:9000

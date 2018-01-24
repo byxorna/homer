@@ -7,9 +7,14 @@ import (
 
 // Config ...
 type Config struct {
-	ListenAddr string `yaml:"listenaddr"`
-	ListenPort int    `yaml:"listenport"`
-	DOHURL     string `yaml:"dohurl"`
+	ListenAddr string     `yaml:"listenaddr"`
+	ListenPort int        `yaml:"listenport"`
+	DOH        *DOHConfig `yaml:"doh"`
+}
+
+// DOHConfig ...
+type DOHConfig struct {
+	URL string `yaml:"url"`
 }
 
 // LoadConfig loads a config from a byte buffer
@@ -25,8 +30,11 @@ func LoadConfig(buf []byte) (Config, error) {
 	if cfg.ListenAddr == "" {
 		cfg.ListenAddr = "127.0.0.1"
 	}
-	if cfg.DOHURL == "" {
-		cfg.DOHURL = "http://127.0.0.1"
+	if cfg.DOH == nil {
+		cfg.DOH = &DOHConfig{}
+	}
+	if cfg.DOH.URL == "" {
+		cfg.DOH.URL = "http://127.0.0.1"
 	}
 
 	return cfg, nil

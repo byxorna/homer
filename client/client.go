@@ -132,7 +132,7 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 	//NOTE: using GET becuase its cachable
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s/.well-known/dns-query", c.cfg.DOHURL),
+		fmt.Sprintf("%s/.well-known/dns-query", c.cfg.DOH.URL),
 		nil)
 	if err != nil {
 		return err

@@ -4,3 +4,4 @@ listenport: 9000
 resolvers:
 - 98.139.252.6
 - 98.139.252.7
+debug: true

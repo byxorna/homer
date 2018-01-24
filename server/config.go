@@ -11,6 +11,7 @@ type Config struct {
 	ListenPort int    `yaml:"listenport"`
 	// Resolvers are a list of IPs to send DNS queries to
 	Resolvers []string `yaml:"resolvers"`
+	Debug     bool     `yaml:"debug"`
 }
 
 // LoadConfig loads a config from a byte buffer
@@ -21,7 +22,7 @@ func LoadConfig(buf []byte) (Config, error) {
 		return Config{}, fmt.Errorf("Fuck! unable to unmarshal: %v", err)
 	}
 	if cfg.ListenPort == 0 {
-		cfg.ListenPort = 9000
+		cfg.ListenPort = 80
 	}
 	if cfg.ListenAddr == "" {
 		cfg.ListenAddr = "0.0.0.0"

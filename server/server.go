@@ -53,13 +53,15 @@ func (s *srv) ListenAndServe() error {
 }
 
 func (s *srv) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	dumpreq, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		log.Printf("bro... cant dump request: %v\n", err)
-		res.WriteHeader(http.StatusInternalServerError)
-		return
+	if s.cfg.Debug {
+		dumpreq, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			log.Printf("bro... cant dump request: %v\n", err)
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Printf("got request for dns-query: %s\n", bytes.NewBuffer(dumpreq).String())
 	}
-	log.Printf("got request for dns-query: %s\n", bytes.NewBuffer(dumpreq).String())
 	if req.Method == http.MethodGet {
 		ctype := req.Header.Get("content-type")
 		if ctype != types.TypeDNSUDPWireFormat {
@@ -85,7 +87,7 @@ func (s *srv) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 		dnsReq, err := base64.URLEncoding.DecodeString(encodedBodyParam)
 		if err != nil {
-			log.Printf("unable to decode body parameter: %s -> %v\n", encodedBodyParam, err)
+			log.Printf("error decoding body parameter: %s -> %v\n", encodedBodyParam, err)
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -94,12 +96,12 @@ func (s *srv) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		var msg dns.Msg
 		err = msg.Unpack(dnsReq)
 		if err != nil {
-			log.Printf("unable to unpack request into DNS message: %v\n", err)
+			log.Printf("error unpacking request into DNS message: %v\n", err)
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("got message: %s\n", msg.String())
+		//log.Printf("got message: %s\n", msg.String())
 		if len(msg.Question) < 1 {
 			log.Printf("no questions in message\n")
 			res.WriteHeader(http.StatusBadRequest)
@@ -107,15 +109,19 @@ func (s *srv) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 
 		// fire off a request
-		log.Printf("Sending DNS request...\n")
-		dnsResp, rtt, err := s.dnsClient.Exchange(&msg, fmt.Sprintf("%s:%d", s.cfg.Resolvers[0], 53))
-		log.Printf("Response in %s\n", rtt.String())
+		if s.cfg.Debug {
+			log.Printf("Sending DNS request...\n")
+		}
+		resolver := s.cfg.Resolvers[0]
+		dnsResp, rtt, err := s.dnsClient.Exchange(&msg, fmt.Sprintf("%s:%d", resolver, 53))
 		if err != nil {
-			log.Printf("error: %v\n", err)
+			log.Printf("error exchanging DNS request with %s: %v\n", resolver, err)
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Printf("Response Message: %s\n", dnsResp)
+		if s.cfg.Debug {
+			log.Printf("Response Message from %s in %s:\n%s", resolver, rtt.String(), dnsResp)
+		}
 
 		packedMsg, err := dnsResp.Pack()
 		if err != nil {
@@ -131,7 +137,7 @@ func (s *srv) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	//TODO implement POST
+	//TODO implement POST DOH
 	res.WriteHeader(http.StatusMethodNotAllowed)
 	return
 }
