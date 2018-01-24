@@ -113,11 +113,11 @@ func (c *client) handle(buf []byte, ua *net.UDPAddr, conn *net.UDPConn) error {
 
 	qname := reqMsg.Question[0].Name
 	qtype := dns.TypeToString[reqMsg.Question[0].Qtype]
-	log.Printf("resolving %s/%s", qname, qtype)
+	qid := fmt.Sprintf("%s|%s", qtype, qname)
+	log.Printf("resolving %s", qid)
 
 	// handle returning results from cache if present
 	// lifted from https://github.com/pforemski/dingo/blob/master/dingo.go#L100
-	qid := fmt.Sprintf("%s|%s", qtype, qname)
 	if x, found := c.cache.Get(qid); found {
 		// FIXME: update TTLs
 		log.Printf("cached entry for %s found\n", qid)
