@@ -2,6 +2,6 @@
 listenaddr: 0.0.0.0
 listenport: 9000
 resolvers:
-- 98.139.252.6
-- 98.139.252.7
+- 8.8.8.8
+- 8.8.4.4
 debug: true
