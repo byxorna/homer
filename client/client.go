@@ -2,6 +2,8 @@ package client
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -35,7 +37,25 @@ func NewClient(cfg Config) (Client, error) {
 		return nil, fmt.Errorf("couldnt parse listenaddress")
 	}
 	lport := cfg.ListenPort
+
 	httpClient := http.Client{}
+	if cfg.DOH.CAFile != "" {
+		// if provided, use a custom CA
+		caCert, err := ioutil.ReadFile(cfg.DOH.CAFile)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		// Setup HTTPS client
+		tlsConfig := &tls.Config{
+			RootCAs: caCertPool,
+		}
+		tlsConfig.BuildNameToCertificate()
+		httpClient = http.Client{Transport: &http.Transport{TLSClientConfig: tlsConfig}}
+	}
+
 	c := client{
 		cfg:        cfg,
 		listenIP:   laddr,

@@ -1,0 +1,6 @@
+---
+listenaddr: 127.0.0.1
+listenport: 53
+doh:
+  url: https://pipefail.com
+  cafile: ./config/letsencrypt-ca.pem

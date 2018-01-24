@@ -14,7 +14,8 @@ type Config struct {
 
 // DOHConfig ...
 type DOHConfig struct {
-	URL string `yaml:"url"`
+	URL    string `yaml:"url"`
+	CAFile string `yaml:"cafile"`
 }
 
 // LoadConfig loads a config from a byte buffer
