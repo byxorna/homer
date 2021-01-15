@@ -26,12 +26,14 @@ client: fmt | $(BASE) ; $(info $(M) building client executable…) @ ## Build pr
 	  -tags release \
 	  -ldflags '-X $(PACKAGE)/internal/version.Version=$(VERSION) -X $(PACKAGE)/internal/version.BuildDate=$(DATE) -X $(PACKAGE)/internal/version.Package=$(PACKAGE)' \
 	  -o bin/$(BINARY_CLIENT) ./cmd/client \
+		&& chmod +x bin/$(BINARY_CLIENT) \
 	  && echo "Built bin/$(BINARY_CLIENT): $(VERSION) $(DATE)"
 server: fmt | $(BASE) ; $(info $(M) building server executable…) @ ## Build program binary
 	$Q cd $(BASE) && $(GO) build \
 	  -tags release \
 	  -ldflags '-X $(PACKAGE)/internal/version.Version=$(VERSION) -X $(PACKAGE)/internal/version.BuildDate=$(DATE) -X $(PACKAGE)/internal/version.Package=$(PACKAGE)' \
 	  -o bin/$(BINARY_SERVER) ./cmd/server \
+		&& chmod +x bin/$(BINARY_SERVER) \
 	  && echo "Built bin/$(BINARY_SERVER): $(VERSION) $(DATE)"
 .PHONY: release
 release: export GOOS=linux
