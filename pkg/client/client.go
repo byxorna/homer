@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/byxorna/homer/types"
+	"github.com/byxorna/homer/pkg/types"
 	"github.com/miekg/dns"
 	"github.com/patrickmn/go-cache"
 )
