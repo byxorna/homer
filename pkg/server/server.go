@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 
+	"github.com/byxorna/homer/pkg/types"
 	"github.com/miekg/dns"
-
-	"github.com/byxorna/homer/types"
 )
 
 type srv struct {

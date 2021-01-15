@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/byxorna/homer/server"
-	"github.com/byxorna/homer/version"
+	"github.com/byxorna/homer/internal/version"
+	"github.com/byxorna/homer/pkg/server"
 )
 
 var (
