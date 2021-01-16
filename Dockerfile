@@ -8,5 +8,6 @@ RUN make && chmod +x bin/*
 FROM debian:latest
 COPY --from=build /go/src/github.com/byxorna/homer/bin/homer-server /bin/homer-server
 COPY --from=build /go/src/github.com/byxorna/homer/bin/homer-client /bin/homer-client
+COPY config/ /config/
 ENTRYPOINT ["homer-server","-config","config/server.yaml"]
 EXPOSE 9000
