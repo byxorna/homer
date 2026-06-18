@@ -45,8 +45,29 @@ Content-Type: application/dns-udpwireformat
 Accept: application/dns-udpwireformat</code></pre>
 
 <h2>Client Setup</h2>
-<p>See the <a href="https://github.com/byxorna/homer#readme">project README</a> for install instructions.</p>
-<p>Once installed, point <code>homer-client</code> at this server:</p>
+
+<h3>Container (recommended)</h3>
+<p>The container image ships both <code>homer-client</code> and <code>homer-server</code>. Pull it and run the client directly:</p>
+<pre><code>podman pull docker.io/byxorna/homer-server:latest</code></pre>
+<p>Create a client config pointing at this server:</p>
+<pre><code># config.yaml
+listenaddr: 0.0.0.0
+listenport: 53
+doh:
+  url: https://YOUR_DOMAIN</code></pre>
+<p>Run the client, binding port 53 on the host:</p>
+<pre><code>podman run -d --name homer-client \
+  --restart unless-stopped \
+  -p 127.0.0.1:53:53/udp \
+  -v $(pwd)/config.yaml:/config/client.yaml:ro \
+  --entrypoint homer-client \
+  docker.io/byxorna/homer-server:latest \
+  -config /config/client.yaml</code></pre>
+<p>Then set <code>nameserver 127.0.0.1</code> in <code>/etc/resolv.conf</code> and query normally with <code>dig</code>.</p>
+<p>To stop: <code>podman stop homer-client</code></p>
+
+<h3>From source</h3>
+<p>See the <a href="https://github.com/byxorna/homer#readme">project README</a> for build instructions.</p>
 <pre><code># config.yaml
 listenaddr: 127.0.0.1
 listenport: 53
