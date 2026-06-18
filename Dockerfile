@@ -1,13 +1,14 @@
-FROM golang:1.15 AS build
-MAINTAINER Gabe Conradi <gabe.conradi@gmail.com>
-#ENV PATH=$PATH:/go/src/app/bin
-WORKDIR /go/src/github.com/byxorna/homer
+FROM golang:1.26 AS build
+LABEL maintainer="Gabe Conradi <gabe.conradi@gmail.com>"
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN make && chmod +x bin/*
+RUN CGO_ENABLED=0 make && chmod +x bin/*
 
-FROM debian:latest
-COPY --from=build /go/src/github.com/byxorna/homer/bin/homer-server /bin/homer-server
-COPY --from=build /go/src/github.com/byxorna/homer/bin/homer-client /bin/homer-client
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /src/bin/homer-server /bin/homer-server
+COPY --from=build /src/bin/homer-client /bin/homer-client
 COPY config/ /config/
 ENTRYPOINT ["homer-server","-config","config/server.yaml"]
 EXPOSE 9000
