@@ -2,22 +2,31 @@ package server
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/base64"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"time"
 
+	"github.com/byxorna/homer/internal/version"
 	"github.com/byxorna/homer/pkg/types"
 	"github.com/miekg/dns"
 )
 
 type srv struct {
-	cfg Config
-	mux *http.ServeMux
-	//udpConn   *net.UDPConn
+	cfg       Config
+	mux       *http.ServeMux
 	dnsClient dns.Client
+	indexPage []byte
 }
+
+//go:embed index.html
+var indexHTML string
+
+var indexTmpl = template.Must(template.New("index").Parse(indexHTML))
 
 // Server is the server interface
 type Server interface {
@@ -26,23 +35,40 @@ type Server interface {
 
 // NewServer does what it says
 func NewServer(cfg Config) (Server, error) {
-	//resolverAddr := net.UDPAddr{
-	//	IP:   net.ParseIP(cfg.Resolvers[0]),
-	//	Port: 53,
-	//}
-	//log.Printf("establishing a connection to %v\n", resolverAddr)
-	//udpConn, err := net.DialUDP("udp", nil, &resolverAddr)
-	//if err != nil {
-	//	return nil, err
-	//}
+	var indexBuf bytes.Buffer
+	err := indexTmpl.Execute(&indexBuf, struct {
+		Version   string
+		BuildDate string
+		Package   string
+		StartTime string
+	}{
+		Version:   version.Version,
+		BuildDate: version.BuildDate,
+		Package:   version.Package,
+		StartTime: time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("unable to render index page: %v", err)
+	}
+
 	server := srv{
-		cfg: cfg,
-		mux: http.NewServeMux(),
-		//udpConn:   udpConn,
+		cfg:       cfg,
+		mux:       http.NewServeMux(),
 		dnsClient: dns.Client{},
+		indexPage: indexBuf.Bytes(),
 	}
 	server.mux.Handle("/.well-known/dns-query", &server)
+	server.mux.HandleFunc("/", server.serveIndex)
 	return &server, nil
+}
+
+func (s *srv) serveIndex(res http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		http.NotFound(res, req)
+		return
+	}
+	res.Header().Set("Content-Type", "text/html; charset=utf-8")
+	res.Write(s.indexPage)
 }
 
 func (s *srv) ListenAndServe() error {

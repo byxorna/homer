@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>homer - DNS over HTTPS</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; max-width: 700px; margin: 2em auto; padding: 0 1em; color: #24292e; line-height: 1.6; }
+  h1 { border-bottom: 1px solid #eaecef; padding-bottom: .3em; }
+  h2 { margin-top: 1.5em; }
+  code { background: #f6f8fa; padding: .2em .4em; border-radius: 3px; font-size: 90%; }
+  pre { background: #f6f8fa; padding: 1em; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: .4em .8em; border-bottom: 1px solid #eaecef; }
+  th { background: #f6f8fa; }
+  a { color: #0366d6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .meta { color: #586069; font-size: 90%; }
+</style>
+</head>
+<body>
+<h1>homer</h1>
+<p>DNS over HTTPS server implementing the <a href="https://tools.ietf.org/html/draft-ietf-doh-dns-over-https-02">IETF DoH draft</a>.</p>
+
+<h2>Build</h2>
+<table>
+  <tr><th>Version</th><td>{{.Version}}</td></tr>
+  <tr><th>Build Date</th><td>{{.BuildDate}}</td></tr>
+  <tr><th>Package</th><td>{{.Package}}</td></tr>
+  <tr><th>Server Started</th><td>{{.StartTime}}</td></tr>
+</table>
+
+<h2>Endpoints</h2>
+<table>
+  <tr><th>Path</th><th>Method</th><th>Description</th></tr>
+  <tr><td><code>/</code></td><td>GET</td><td>This page</td></tr>
+  <tr><td><code>/.well-known/dns-query</code></td><td>GET</td><td>DNS over HTTPS query endpoint</td></tr>
+</table>
+
+<h2>Usage</h2>
+<p>Send a DNS query as a base64url-encoded UDP wire-format message:</p>
+<pre><code>GET /.well-known/dns-query?ct=application/dns-udpwireformat&amp;body=BASE64URL_DNS_MESSAGE
+Content-Type: application/dns-udpwireformat
+Accept: application/dns-udpwireformat</code></pre>
+
+<h2>Client Setup</h2>
+<p>See the <a href="https://github.com/byxorna/homer#readme">project README</a> for install instructions.</p>
+<p>Once installed, point <code>homer-client</code> at this server:</p>
+<pre><code># config.yaml
+listenaddr: 127.0.0.1
+listenport: 53
+doh:
+  url: https://YOUR_DOMAIN</code></pre>
+<pre><code>sudo homer-client -config config.yaml</code></pre>
+<p>Then set <code>nameserver 127.0.0.1</code> in <code>/etc/resolv.conf</code> and query normally with <code>dig</code>.</p>
+
+<h2>Links</h2>
+<ul>
+  <li><a href="https://github.com/byxorna/homer">Source &amp; install instructions</a></li>
+  <li><a href="https://tools.ietf.org/html/draft-ietf-doh-dns-over-https-02">IETF DoH Draft Spec</a></li>
+  <li><a href="https://datatracker.ietf.org/wg/doh/about/">IETF DoH Working Group</a></li>
+</ul>
+
+<p class="meta">homer {{.Version}}</p>
+</body>
+</html>
